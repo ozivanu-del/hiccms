@@ -1,0 +1,119 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { resolveMediaUrl } from '../lib/media';
+import LandingPage from '../components/LandingPage.astro';
+import ViewCount from '../components/ViewCount.astro';
+import { API_URL } from '../lib/api';
+
+let posts = [];
+let errorMsg = null;
+let homepage = null;
+
+try {
+  const res = await fetch(`${API_URL}/api/posts`);
+  const data = await res.json();
+  if (data.success) {
+    // API already filters published or valid scheduled posts
+    posts = data.data;
+  } else {
+    errorMsg = data.message;
+  }
+} catch (e) {
+  errorMsg = "Koneksi ke API Worker gagal.";
+}
+
+try {
+  const homepageResponse = await fetch(`${API_URL}/api/pages/home`);
+  if (homepageResponse.ok) {
+    const homepageResult = await homepageResponse.json();
+    if (homepageResult.success) homepage = homepageResult.data;
+  }
+} catch (e) {
+  console.error('Homepage configuration is unavailable', e);
+}
+
+// Function to format date
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+};
+const homepageImageUrl = resolveMediaUrl(homepage?.featuredImage ?? '');
+---
+
+<Layout
+  standalone={homepage?.template === 'landing'}
+  preloadThemeFont={homepage?.template !== 'landing'}
+  title={homepage?.metaTitle || homepage?.title}
+  description={homepage?.metaDescription || homepage?.excerpt}
+  metaKeywords={homepage?.metaKeywords}
+  ogImage={homepageImageUrl}
+>
+  {homepage ? <LandingPage page={homepage} posts={posts} /> : <>
+  <!-- Hero Section -->
+  <div class="mb-16 text-center">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-white">
+      Jelajahi <span class="text-primary">Kisah</span> Kami
+    </h1>
+    <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+      Kumpulan artikel, pemikiran, dan cerita menarik terbaru yang disajikan khusus untuk Anda.
+    </p>
+  </div>
+
+  <!-- Error State -->
+  {errorMsg && (
+    <div class="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-6 rounded-2xl text-center shadow-sm border border-red-100 dark:border-red-900/50">
+      <p class="font-medium text-lg">Ups! Gagal memuat artikel.</p>
+      <p class="text-sm opacity-80 mt-1">{errorMsg}</p>
+    </div>
+  )}
+
+  <!-- Empty State -->
+  {!errorMsg && posts.length === 0 && (
+    <div class="bg-white dark:bg-gray-800 p-12 rounded-3xl text-center shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700">
+      <div class="w-20 h-20 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+      <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200">Belum ada artikel</h3>
+      <p class="text-gray-500 mt-2">Nantikan tulisan-tulisan menarik kami segera!</p>
+    </div>
+  )}
+
+  <!-- Posts Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    {posts.map((post: any) => (
+      <article class="group relative bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-lg shadow-gray-200/50 dark:shadow-none hover:shadow-2xl hover:shadow-gray-300/60 dark:hover:shadow-black/50 hover:-translate-y-1 transition-all duration-300">
+        <div class="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 relative overflow-hidden">
+          <a href={`/blog/${post.slug}`} aria-label={`Baca ${post.title}`} class="block h-full w-full">
+          {resolveMediaUrl(post.og_image) ? <img src={resolveMediaUrl(post.og_image)} alt={`Gambar ${post.title}`} loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" /> : <div class="absolute inset-0 flex items-center justify-center text-gray-300 dark:text-gray-600">
+            <svg class="w-16 h-16 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM5 19V5h14l.002 14H5z"/><path d="m10 14-1-1-3 4h12l-5-7z"/></svg>
+          </div>}
+          </a>
+          <div class="pointer-events-none absolute inset-0 bg-primary opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+        </div>
+        
+        <div class="p-6">
+          <div class="flex items-center text-xs text-gray-500 dark:text-gray-400 mb-3 space-x-2">
+            <span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full font-medium">
+              {formatDate(post.published_at || post.created_at)}
+            </span>
+            <ViewCount count={post.view_count} />
+          </div>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary transition-colors leading-tight">
+            <a href={`/blog/${post.slug}`}>{post.title}</a>
+          </h2>
+          <p class="text-gray-600 dark:text-gray-300 line-clamp-3 text-sm leading-relaxed">
+            {post.excerpt || 'Tidak ada deskripsi singkat untuk artikel ini.'}
+          </p>
+          <a href={`/blog/${post.slug}`} class="mt-5 inline-flex items-center text-primary font-semibold text-sm group-hover:translate-x-1 transition-transform">
+            Baca selengkapnya
+            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </article>
+    ))}
+  </div>
+  </>}
+</Layout>

@@ -1,0 +1,26 @@
+name = "hiccms-core-api"
+main = "packages/core-api/src/index.ts"
+compatibility_date = "2024-03-20"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+preview_urls = true
+
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "http://localhost:5173"
+ADMIN_URL = "http://localhost:5173"
+SITE_NAME = "HIC-CMS"
+RESET_EMAIL_FROM = "HIC-CMS <noreply@hiccms.com>"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hiccms-db"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "database/migrations"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "hiccms-media"

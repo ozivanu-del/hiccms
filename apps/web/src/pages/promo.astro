@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// SEO Meta Data
+const title = "Spesial Promo HIC-CMS | Penawaran Terbatas";
+const description = "Dapatkan penawaran terbaik dari kami. Jangan lewatkan kesempatan ini.";
+const waNumber = "62811666562"; // Nomor WA dari user
+const waMessage = "Halo, saya tertarik dengan promo HIC-CMS!";
+const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(waMessage)}`;
+---
+
+<Layout title={title} description={description} standalone={true}>
+  {/* HERO SECTION */}
+  <section class="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-blue-800 to-indigo-950 text-white pt-24 pb-32">
+    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop')] opacity-10 bg-cover bg-center"></div>
+    <div class="relative z-10 max-w-5xl mx-auto px-6 text-center space-y-8">
+      <span class="inline-block py-1 px-3 rounded-full bg-blue-500/30 text-blue-200 font-semibold text-sm tracking-widest uppercase mb-4 border border-blue-400/30 backdrop-blur-sm shadow-xl">
+        🌟 Penawaran Terbatas
+      </span>
+      <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-gray-400 leading-tight pb-2">
+        Tingkatkan Bisnis Anda <br class="hidden md:block"/> Ke Level Selanjutnya
+      </h1>
+      <p class="text-xl md:text-2xl text-blue-100/90 max-w-3xl mx-auto font-light leading-relaxed">
+        Platform modern yang dirancang khusus untuk mempercepat pertumbuhan bisnis Anda dengan teknologi mutakhir dan antarmuka premium.
+      </p>
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href={waLink} target="_blank" rel="noopener noreferrer" class="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-green-500 hover:bg-green-400 text-white font-bold rounded-full text-lg shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] hover:shadow-[0_0_60px_-10px_rgba(34,197,94,0.8)] transition-all duration-300 hover:-translate-y-1 overflow-hidden w-full sm:w-auto">
+          <span class="absolute inset-0 w-full h-full bg-gradient-to-r from-green-400 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+          <svg class="relative z-10 w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+          <span class="relative z-10">Pesan Sekarang</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* SEAMLESS GALLERY SECTION */}
+  <section class="bg-gray-900 w-full overflow-hidden">
+    <div class="flex flex-col w-full max-w-4xl mx-auto">
+      {/* Menggunakan object-cover dan w-full h-auto memastikan gambar memenuhi ruang tanpa celah */}
+      <img src="https://api.hiccms.com/api/media/file/9bf6658c-9cfb-4b0a-b25c-993a2c5ea03d.png" alt="Fitur 1" class="w-full h-auto block m-0 p-0 border-none select-none hover:opacity-95 transition-opacity" />
+      <img src="https://api.hiccms.com/api/media/file/e0021e27-5fb0-4b47-887a-dcc99e42d0e4.png" alt="Fitur 2" class="w-full h-auto block m-0 p-0 border-none select-none hover:opacity-95 transition-opacity" />
+      <img src="https://api.hiccms.com/api/media/file/dfac552a-733c-47b9-b466-b2f61f9d7792.jpg" alt="Fitur 3" class="w-full h-auto block m-0 p-0 border-none select-none hover:opacity-95 transition-opacity" />
+      <img src="https://api.hiccms.com/api/media/file/12de5432-a7eb-4402-9e66-86a45b98e26b.jpg" alt="Fitur 4" class="w-full h-auto block m-0 p-0 border-none select-none hover:opacity-95 transition-opacity" />
+    </div>
+  </section>
+
+  {/* FEATURE CARDS SECTION */}
+  <section class="py-24 bg-white">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Mengapa Memilih Kami?</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">Fitur unggulan yang dirancang untuk memberikan hasil maksimal.</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-8">
+        {[
+          { title: "Desain Premium", desc: "Tampilan memukau yang meningkatkan kredibilitas.", icon: "✨" },
+          { title: "Performa Kilat", desc: "Website secepat kilat untuk retensi pengunjung.", icon: "⚡" },
+          { title: "Dukungan 24/7", desc: "Tim ahli kami siap membantu Anda kapan saja.", icon: "🤝" }
+        ].map(item => (
+          <div class="bg-gray-50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300 border border-gray-100 hover:shadow-xl hover:shadow-blue-900/5 group">
+            <div class="text-4xl mb-4 group-hover:scale-110 transition-transform origin-bottom-left">{item.icon}</div>
+            <h3 class="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
+            <p class="text-gray-600 leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* FLOATING WHATSAPP BUTTON dihapus agar tidak ganda dengan bawaan layout (meski standalone=true, Layout.astro tetap me-render button jika diaktifkan dari database) */}
+
+
+  {/* SIMPLE FOOTER */}
+  <footer class="bg-gray-900 py-8 border-t border-gray-800 text-center">
+    <p class="text-gray-400 text-sm">
+      &copy; {new Date().getFullYear()} HIC-CMS.com. Hak Cipta Dilindungi.
+    </p>
+  </footer>
+</Layout>

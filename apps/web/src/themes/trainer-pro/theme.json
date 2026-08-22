@@ -1,0 +1,23 @@
+{
+  "id": "trainer-pro",
+  "name": "Trainer Pro",
+  "version": "1.1.0",
+  "description": "Tema bawaan HICCMS untuk blog dan situs profesional.",
+  "author": "HICCMS",
+  "config": {
+    "mode": "light",
+    "colors": {
+      "primary": "#2563eb",
+      "secondary": "#7e3af2",
+      "background": "#f9fafb",
+      "foreground": "#111827"
+    },
+    "font": {
+      "family": "Inter",
+      "source": "google",
+      "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    },
+    "customCss": "",
+    "customJavaScript": ""
+  }
+}

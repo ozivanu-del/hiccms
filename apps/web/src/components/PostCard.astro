@@ -1,0 +1,50 @@
+---
+export interface Props {
+  title: string;
+  excerpt: string;
+  slug: string;
+  category: string;
+  author: string;
+  publishedAt: string;
+  image?: string | null;
+  viewCount?: number | null;
+}
+
+import { resolveMediaUrl } from '../lib/media';
+import ViewCount from './ViewCount.astro';
+
+const { title, excerpt, slug, category, author, publishedAt, image, viewCount = 0 } = Astro.props;
+const imageUrl = resolveMediaUrl(image);
+
+// Format date
+const date = new Date(publishedAt).toLocaleDateString('id-ID', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<article class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex flex-col h-full">
+  {imageUrl && <a href={`/blog/${slug}`} class="block aspect-video overflow-hidden bg-gray-100"><img src={imageUrl} alt={`Gambar ${title}`} loading="lazy" class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" /></a>}
+  <div class="p-6 flex flex-col flex-grow">
+    <div class="flex items-center justify-between mb-4">
+      <span class="text-xs font-semibold uppercase tracking-wider text-secondary bg-secondary/10 px-3 py-1 rounded-full">{category || 'Uncategorized'}</span>
+      <time class="text-sm text-gray-500">{date}</time>
+    </div>
+    <a href={`/blog/${slug}`} class="block mt-2 flex-grow">
+      <h2 class="text-xl font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-2">{title}</h2>
+      <p class="mt-3 text-base text-gray-600 line-clamp-3">{excerpt}</p>
+    </a>
+    <div class="mt-6 flex items-center justify-between gap-4">
+      <div class="flex-shrink-0">
+        <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
+          {author ? author.charAt(0).toUpperCase() : 'A'}
+        </div>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm font-medium text-gray-900">{author || 'Admin'}</p>
+      </div>
+      <ViewCount count={viewCount} class="ml-auto text-xs text-gray-500" />
+    </div>
+  </div>
+</article>

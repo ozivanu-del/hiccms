@@ -1,0 +1,9 @@
+{
+  "name": "@hiccms/page-manager",
+  "version": "1.1.1",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "build": "tsc --noEmit" },
+  "devDependencies": { "typescript": "^5.0.4" }
+}

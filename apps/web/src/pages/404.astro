@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+Astro.response.status = 404;
+---
+
+<Layout title="Halaman Tidak Ditemukan" description="Halaman yang Anda cari tidak tersedia.">
+  <section class="mx-auto max-w-2xl py-20 text-center">
+    <p class="text-sm font-semibold uppercase tracking-[0.3em] text-primary">404</p>
+    <h1 class="mt-4 text-4xl font-extrabold text-gray-900 dark:text-white md:text-5xl">Halaman tidak ditemukan</h1>
+    <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">Tautan mungkin sudah berubah atau konten tidak lagi tersedia.</p>
+    <a href="/" class="mt-8 inline-flex rounded-xl bg-primary px-5 py-3 font-semibold text-white transition-opacity hover:opacity-90">Kembali ke beranda</a>
+  </section>
+</Layout>

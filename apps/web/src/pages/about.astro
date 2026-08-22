@@ -1,0 +1,173 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { API_URL } from '../lib/api';
+import type { Page } from '@hiccms/page-manager';
+import { resolveMediaUrl } from '../lib/media';
+
+// Fetch settings to display site name dynamically if needed
+let siteName = "HICCMS";
+let page: Page | null = null;
+try {
+  const [settingsResponse, pageResponse] = await Promise.all([
+    fetch(`${API_URL}/api/settings`),
+    fetch(`${API_URL}/api/pages/about`),
+  ]);
+  const data = await settingsResponse.json();
+  const pageData = pageResponse.ok ? await pageResponse.json() : null;
+  if (data.success && data.data?.site_name) siteName = data.data.site_name;
+  if (pageData?.success && pageData.data) page = pageData.data as Page;
+} catch (e) {
+  console.error("Failed to fetch settings API");
+}
+const imageUrl = resolveMediaUrl(page?.featuredImage ?? '');
+---
+
+<Layout
+  title={page?.metaTitle || page?.title || "Tentang Kami"}
+  description={page?.metaDescription || page?.excerpt}
+  metaKeywords={page?.metaKeywords}
+  ogImage={imageUrl}
+>
+  {page ? <article class:list={["mx-auto", { "max-w-3xl": page.template !== 'full-width', "max-w-none": page.template === 'full-width' }]}>
+    <header class="mb-10 text-center"><h1 class="text-4xl font-extrabold md:text-5xl">{page.title}</h1>{page.excerpt && <p class="mt-4 text-xl text-gray-500">{page.excerpt}</p>}</header>
+    {imageUrl && <img src={imageUrl} alt={`Gambar ${page.title}`} class="mb-10 aspect-video w-full rounded-2xl object-cover" />}
+    <div class="prose prose-lg max-w-none dark:prose-invert" set:html={page.content}></div>
+  </article> : <div class="max-w-4xl mx-auto">
+    <!-- Hero Header -->
+    <header class="text-center mb-16">
+      <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6 tracking-tight">
+        Di Balik Layar <br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">
+          {siteName}
+        </span>
+      </h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        Selamat datang di ruang perkenalan kami. Tempat di mana ide-ide inovatif dirajut menjadi barisan kode yang bermakna.
+      </p>
+    </header>
+
+    <!-- Main Content -->
+    <article class="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-700 p-8 md:p-16 mb-16">
+      
+      <div class="prose prose-lg dark:prose-invert prose-primary max-w-none font-serif leading-loose">
+        <h2 class="text-3xl font-bold font-sans">Kisah Kami</h2>
+        <p>
+          HICCMS (Henri Ilham Caniago Content Management System) lahir dari sebuah gagasan sederhana: bagaimana membangun sebuah sistem manajemen konten yang tidak hanya cepat dan aman, tetapi juga memiliki keindahan visual yang memanjakan mata. Kami percaya bahwa teknologi masa depan tidak perlu mengorbankan estetika.
+        </p>
+        
+        <h2 class="text-3xl font-bold font-sans mt-10">Visi & Misi</h2>
+        <p>
+          Misi kami adalah memberikan kebebasan berekspresi kepada para penulis, kreator, dan pemikir digital. Dengan arsitektur berbasis <strong>Cloudflare Worker</strong> yang canggih, kami memastikan setiap tulisan Anda dapat diakses dari seluruh dunia dalam hitungan milidetik.
+        </p>
+
+        <!-- 5 Keunggulan Mutlak -->
+        <h2 class="text-3xl font-bold font-sans mt-12 mb-4">5 Keunggulan Mutlak (Superpower)</h2>
+        <p class="font-sans text-base text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
+          Yang membuat HICCMS unggul dari yang lain. Jika Anda berencana untuk membagikan, menjadikan <em>open-source</em>, atau bahkan menjual HICCMS ini agar bisa dipakai oleh orang banyak, Anda memegang kartu truf yang sangat kuat!
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 not-prose font-sans mb-12">
+          
+          <!-- Card 1 -->
+          <div class="bg-gradient-to-br from-slate-900 to-indigo-950 p-6 rounded-2xl border border-indigo-500/30 shadow-lg relative overflow-hidden group hover:border-indigo-400 transition-colors">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-300 font-black text-xl shadow-inner">01</div>
+              <div>
+                <h3 class="text-lg font-bold text-white leading-tight flex items-center"><svg class="w-4 h-4 mr-1.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg> KECEPATAN CAHAYA</h3>
+                <span class="text-[11px] text-indigo-300 font-semibold tracking-wider uppercase">(Edge Computing)</span>
+              </div>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              HICCMS berjalan di atas Cloudflare Workers API di-deploy otomatis ke ratusan pusat data Cloudflare di seluruh dunia. Hasilnya? Kecepatan akses nyaris instan (nol milidetik)!
+            </p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="bg-gradient-to-br from-emerald-950 to-slate-900 p-6 rounded-2xl border border-emerald-500/30 shadow-lg relative overflow-hidden group hover:border-emerald-400 transition-colors">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-black text-xl shadow-inner">02</div>
+              <div>
+                <h3 class="text-lg font-bold text-white leading-tight flex items-center"><svg class="w-4 h-4 mr-1.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> BIAYA Rp 0,-</h3>
+                <span class="text-[11px] text-emerald-400 font-semibold tracking-wider uppercase">(Sangat Murah)</span>
+              </div>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Dibangun di ekosistem Cloudflare Free Tier. Workers (API), D1 (Database), dan R2 (Storage) memiliki kuota gratis yang sangat besar. Server Rp 0 per bulan!
+            </p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="bg-gradient-to-br from-blue-950 to-slate-900 p-6 rounded-2xl border border-blue-500/30 shadow-lg relative overflow-hidden group hover:border-blue-400 transition-colors">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-black text-xl shadow-inner">03</div>
+              <div>
+                <h3 class="text-lg font-bold text-white leading-tight flex items-center"><svg class="w-4 h-4 mr-1.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg> ARSITEKTUR BEBAS</h3>
+                <span class="text-[11px] text-blue-400 font-semibold tracking-wider uppercase">("Headless" CMS)</span>
+              </div>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Pisahkan "Kepala" (Tampilan) dan "Badan" (Database). Tulis sekali, tampil di mana saja! Satu konten untuk Website, Mobile App, Smartwatch, dan perangkat lainnya.
+            </p>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="bg-gradient-to-br from-rose-950 to-slate-900 p-6 rounded-2xl border border-rose-500/30 shadow-lg relative overflow-hidden group hover:border-rose-400 transition-colors">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-400 font-black text-xl shadow-inner">04</div>
+              <div>
+                <h3 class="text-lg font-bold text-white leading-tight flex items-center"><svg class="w-4 h-4 mr-1.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> TINGKAT MILITER</h3>
+                <span class="text-[11px] text-rose-400 font-semibold tracking-wider uppercase">(Anti-Hack)</span>
+              </div>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              TypeScript + JWT HS256 + Database D1 tersembunyi di balik tameng proksi Cloudflare. Sistem aman dari brute force, SQL Injection, dan serangan umum lainnya.
+            </p>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="md:col-span-2 bg-gradient-to-br from-amber-950 via-slate-900 to-indigo-950 p-6 md:p-8 rounded-2xl border border-amber-500/30 shadow-lg relative overflow-hidden group hover:border-amber-400 transition-colors">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+              <div class="w-12 h-12 shrink-0 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 font-black text-xl shadow-inner">05</div>
+              <div>
+                <h3 class="text-lg md:text-xl font-bold text-white leading-tight flex items-center mb-1"><svg class="w-5 h-5 mr-1.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg> SANGAT RAMAH PROGRAMMER</h3>
+                <span class="text-[11px] text-amber-400 font-semibold tracking-wider uppercase block mb-3">(Modern Stack)</span>
+                <p class="text-slate-300 text-sm leading-relaxed max-w-2xl">
+                  Dibangun dengan React, Tailwind CSS, TypeScript, dan Hono.js. Kode bersih (Clean Architecture), rapi (Monorepo), dan mudah dimodifikasi. Programmer akan mencintainya!
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <h2 class="text-3xl font-bold font-sans">Sang Kreator</h2>
+        <div class="flex flex-col md:flex-row gap-8 items-center md:items-start mt-6 not-prose bg-gray-50 dark:bg-gray-900/50 p-6 md:p-8 rounded-2xl border border-gray-100 dark:border-gray-800">
+          <!-- Placeholder Avatar -->
+          <div class="w-32 h-32 shrink-0 bg-gradient-to-br from-primary to-blue-300 rounded-full flex items-center justify-center text-white text-5xl font-bold shadow-lg">
+            HIC
+          </div>
+          <div>
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-sans">Henri Ilham Caniago</h3>
+            <p class="text-primary font-medium mb-4 font-sans tracking-wide uppercase text-sm">Founder & Lead Architect</p>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed font-sans mb-3">
+              Seorang visioner teknologi yang memiliki hasrat tinggi dalam menggabungkan keandalan infrastruktur cloud dengan keindahan antarmuka antariksa. HICCMS adalah bukti nyata dari dedikasi tiada henti terhadap penyempurnaan kode.
+            </p>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed font-sans">
+              Sebagai sebuah <strong class="text-primary font-bold">Karya Urang Minang</strong>, CMS ini dirancang dengan filosofi ketekunan dan kemandirian, siap bersaing dengan platform-platform kelas dunia!
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </article>
+    
+    <div class="text-center">
+      <a href="/" class="inline-flex items-center text-primary font-semibold hover:opacity-80 transition-opacity">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Kembali ke Beranda
+      </a>
+    </div>
+
+  </div>}
+</Layout>

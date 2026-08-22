@@ -1,0 +1,35 @@
+---
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import { SITE_NAME, SITE_URL } from '../lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = `Website ${SITE_NAME}` } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? SITE_URL);
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="flex flex-col min-h-screen">
+    <Navbar />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <footer class="bg-gray-900 text-white py-8 text-center mt-12">
+      <p>&copy; {new Date().getFullYear()} {SITE_NAME}. Hak Cipta Dilindungi.</p>
+    </footer>
+  </body>
+</html>

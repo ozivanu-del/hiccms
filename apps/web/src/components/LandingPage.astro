@@ -1,0 +1,59 @@
+---
+import type { Page } from '@hiccms/page-manager';
+import { resolveMediaUrl } from '../lib/media';
+import ViewCount from './ViewCount.astro';
+import landingImageOneUrl from '../assets/landing/hiccms-landing-1.webp?url';
+import landingImageTwoUrl from '../assets/landing/hiccms-landing-2.webp?url';
+import landingImageThreeUrl from '../assets/landing/hiccms-landing-3.webp?url';
+import landingImageFourUrl from '../assets/landing/hiccms-landing-4.webp?url';
+interface Props { page: Page; posts: Array<Record<string, any>> }
+const { page, posts } = Astro.props;
+const imageUrl = resolveMediaUrl(page.featuredImage);
+const optimizedLandingImages: Record<string, { src: string; width: number; height: number }> = {
+  'e0021e27-5fb0-4b47-887a-dcc99e42d0e4.png': { src: landingImageOneUrl, width: 1376, height: 768 },
+  '4aea978f-698c-49aa-a125-c936d4395f1a.png': { src: landingImageTwoUrl, width: 1376, height: 768 },
+  'dfac552a-733c-47b9-b466-b2f61f9d7792.jpg': { src: landingImageThreeUrl, width: 1376, height: 768 },
+  '12de5432-a7eb-4402-9e66-86a45b98e26b.jpg': { src: landingImageFourUrl, width: 1920, height: 1050 },
+};
+let landingImageIndex = 0;
+const landingContent = page.template === 'landing'
+  ? page.content.replace(/<img\b([^>]*)>/gi, (_tag, attributes: string) => {
+      const src = attributes.match(/\bsrc=["']([^"']+)["']/i)?.[1];
+      const filename = src?.split('/').pop();
+      const optimizedImage = filename ? optimizedLandingImages[filename] : undefined;
+      const priority = landingImageIndex++ === 0
+        ? ' loading="eager" fetchpriority="high"'
+        : ' loading="lazy"';
+      const size = optimizedImage && !/\bwidth=/i.test(attributes) && !/\bheight=/i.test(attributes)
+        ? ` width="${optimizedImage.width}" height="${optimizedImage.height}"`
+        : '';
+      const optimizedAttributes = optimizedImage
+        ? attributes.replace(/\bsrc=["'][^"']+["']/i, `src="${optimizedImage.src}"`)
+        : attributes;
+      return `<img${optimizedAttributes}${size}${priority} decoding="async">`;
+    })
+  : page.content;
+const heroBackground = import.meta.env.PUBLIC_HOMEPAGE_HERO_BACKGROUND?.trim();
+const heroAccent = import.meta.env.PUBLIC_HOMEPAGE_HERO_ACCENT?.trim();
+---
+{page.template === 'landing' ? <section id="content" class="landing-content w-full overflow-hidden" set:html={landingContent}></section> : <><section class:list={["overflow-hidden rounded-3xl text-white shadow-xl", { "bg-gray-950": !heroBackground }]} style={heroBackground ? { background: heroBackground } : undefined}><div class="grid items-center gap-8 p-8 md:grid-cols-2 md:p-14"><div><p class:list={["mb-3 text-sm font-semibold uppercase tracking-widest", { "text-primary": !heroAccent }]} style={heroAccent ? { color: heroAccent } : undefined}>Selamat datang</p><h1 class="text-4xl font-extrabold leading-tight md:text-6xl">{page.title}</h1>{page.excerpt && <p class="mt-5 text-lg leading-relaxed text-gray-200">{page.excerpt}</p>}<a href="#content" class:list={["mt-7 inline-flex rounded-lg px-5 py-3 font-semibold", { "bg-primary text-white": !heroAccent, "text-slate-950": heroAccent }]} style={heroAccent ? { backgroundColor: heroAccent } : undefined}>Pelajari Selengkapnya</a></div>{imageUrl && <img src={imageUrl} alt={`Gambar ${page.title}`} class="aspect-[4/3] w-full rounded-2xl object-cover" />}</div></section>
+<section id="content" class:list={["prose prose-lg dark:prose-invert mx-auto py-14", { "max-w-3xl": page.template !== 'full-width', "max-w-none": page.template === 'full-width' }]} set:html={page.content}></section>
+</>}
+{page.template !== 'landing' && posts.length > 0 && <section class="border-t py-14"><div class="mb-8 flex items-end justify-between"><div><p class="text-sm font-semibold uppercase tracking-widest text-primary">Blog</p><h2 class="mt-2 text-3xl font-bold">Artikel Terbaru</h2></div><a href="/blog" class="font-semibold text-primary">Lihat Semua</a></div><div class="grid gap-6 md:grid-cols-3">{posts.slice(0, 3).map((post) => <article class="overflow-hidden rounded-2xl border bg-white dark:bg-gray-800">{resolveMediaUrl(post.og_image) && <img src={resolveMediaUrl(post.og_image)} alt={`Gambar ${post.title}`} loading="lazy" class="aspect-video w-full object-cover" />}<div class="p-5"><h3 class="text-lg font-bold"><a href={`/blog/${post.slug}`}>{post.title}</a></h3><p class="mt-2 line-clamp-2 text-sm text-gray-500">{post.excerpt}</p><ViewCount count={post.view_count} class="mt-4 text-xs text-gray-500" /></div></article>)}</div></section>}
+
+<style>
+  .landing-content :global(p),
+  .landing-content :global(a) {
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .landing-content :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+  }
+</style>

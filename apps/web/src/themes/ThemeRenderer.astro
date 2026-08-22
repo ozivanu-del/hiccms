@@ -1,0 +1,30 @@
+---
+import type { ThemeConfig } from '@hiccms/theme-engine';
+import type { PublicAppearance } from '@hiccms/appearance-manager';
+import type { InstalledThemeId } from './registry';
+import TrainerProLayout from './trainer-pro/ThemeLayout.astro';
+import type { StructuredData } from '../lib/structured-data';
+
+interface Props {
+  themeId: string;
+  title: string;
+  description: string;
+  siteName: string;
+  metaKeywords?: string;
+  ogImage?: string;
+  config: ThemeConfig;
+  appearance: PublicAppearance;
+  standalone?: boolean;
+  preloadThemeFont?: boolean;
+  structuredData?: StructuredData[];
+  whatsapp?: { enabled: boolean; phone: string; label: string; message: string };
+}
+
+const { themeId, ...layoutProps } = Astro.props;
+const layouts = {
+  'trainer-pro': TrainerProLayout,
+} satisfies Record<InstalledThemeId, typeof TrainerProLayout>;
+const ThemeLayout = layouts[themeId as InstalledThemeId] ?? layouts['trainer-pro'];
+---
+
+<ThemeLayout {...layoutProps}><slot /></ThemeLayout>

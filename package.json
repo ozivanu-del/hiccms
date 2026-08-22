@@ -1,0 +1,22 @@
+{
+  "name": "hiccms-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:api": "npx wrangler dev",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:admin": "npm run dev --workspace=apps/admin-dashboard",
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\" \"npm run dev:admin\"",
+    "build:api": "npm run build --workspace=packages/core-api",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:admin": "npm run build --workspace=apps/admin-dashboard"
+  },
+  "devDependencies": {
+    "concurrently": "10.0.4",
+    "wrangler": "^4.114.0"
+  }
+}

@@ -1,0 +1,111 @@
+---
+import type { ThemeConfig } from '@hiccms/theme-engine';
+import type { MenuItem, PublicAppearance } from '@hiccms/appearance-manager';
+import StructuredData from '../../components/StructuredData.astro';
+import WhatsAppButton from '../../components/WhatsAppButton.astro';
+import type { StructuredData as StructuredDataValue } from '../../lib/structured-data';
+import plusJakartaSansUrl from '../../assets/fonts/PlusJakartaSans-Variable.woff2?url';
+import { SITE_URL } from '../../lib/site';
+
+interface Props {
+  title: string;
+  description: string;
+  siteName: string;
+  metaKeywords?: string;
+  ogImage?: string;
+  config: ThemeConfig;
+  appearance: PublicAppearance;
+  standalone?: boolean;
+  preloadThemeFont?: boolean;
+  structuredData?: StructuredDataValue[];
+  whatsapp?: { enabled: boolean; phone: string; label: string; message: string };
+}
+
+const { title, description, siteName, metaKeywords, ogImage, config, appearance, standalone = false, preloadThemeFont = true, structuredData = [], whatsapp } = Astro.props;
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? SITE_URL);
+const usesLegacyDefaultFont = config.font.family.trim().toLowerCase() === 'poppins';
+const fontUrl = config.font.source !== 'system' && !usesLegacyDefaultFont ? config.font.url : undefined;
+const fontFamily = config.font.source === 'system' || usesLegacyDefaultFont
+  ? "'Plus Jakarta Sans', sans-serif"
+  : `${config.font.family}, 'Plus Jakarta Sans', sans-serif`;
+const themeVariables = {
+  primary: config.colors.primary,
+  secondary: config.colors.secondary,
+  background: config.colors.background,
+  foreground: config.colors.foreground,
+  fontFamily,
+};
+const headerMenu = appearance.menus.find((menu) => menu.slug === appearance.header.menuSlug);
+const footerMenu = appearance.menus.find((menu) => menu.slug === appearance.footer.menuSlug);
+const alignmentClass = appearance.header.alignment === 'center'
+  ? 'justify-center' : appearance.header.alignment === 'left' ? 'justify-start' : 'justify-between';
+const footerColumnsClass = {
+  1: 'md:grid-cols-1',
+  2: 'md:grid-cols-2',
+  3: 'md:grid-cols-3',
+  4: 'md:grid-cols-4',
+}[appearance.footer.columns];
+const renderMenuItem = (item: MenuItem) => item;
+---
+
+<!doctype html>
+<html lang="id" class:list={{ dark: config.mode === 'dark' }} data-theme-mode={config.mode}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    {preloadThemeFont && <link rel="preload" href={plusJakartaSansUrl} as="font" type="font/woff2" crossorigin="anonymous" />}
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {metaKeywords && <meta name="keywords" content={metaKeywords} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content={config.colors.primary} />
+    <title>{title}</title>
+    {structuredData.map((data) => <StructuredData data={data} />)}
+    {fontUrl && <link rel="stylesheet" href={fontUrl} />}
+    <style define:vars={themeVariables}>
+      :root {
+        --color-primary: var(--primary);
+        --color-secondary: var(--secondary);
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --font-theme: var(--fontFamily);
+      }
+      body { font-family: var(--font-theme); }
+    </style>
+    {config.customCss && <style is:inline set:html={config.customCss}></style>}
+    {config.mode === 'system' && (
+      <script is:inline>
+        document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches);
+      </script>
+    )}
+  </head>
+  <body class="bg-[var(--color-background)] text-[var(--color-foreground)] dark:bg-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+    <header class:list={["top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-300", { sticky: appearance.header.sticky, hidden: standalone }]}>
+      <div class:list={["max-w-5xl mx-auto px-6 min-h-20 flex flex-wrap items-center gap-6 py-4", alignmentClass]}>
+        {(appearance.header.showLogo || appearance.header.showSiteName) && <a href="/" class="flex items-center gap-2 text-2xl font-bold tracking-tight text-primary hover:opacity-80 transition-opacity">
+          {appearance.header.showLogo && <span class="grid h-9 w-9 place-items-center rounded-lg bg-primary text-sm text-white">H</span>}
+          {appearance.header.showSiteName && siteName}
+        </a>}
+        <nav class="flex flex-wrap items-center gap-x-6 gap-y-2">
+          {headerMenu?.items.map((rawItem) => { const item = renderMenuItem(rawItem); return <div class="group relative"><a href={item.url} target={item.target} rel={item.target === '_blank' ? 'noopener' : undefined} class="text-gray-600 dark:text-gray-300 hover:text-primary font-medium transition-colors">{item.label}</a>{item.children.length > 0 && <div class="invisible absolute left-0 top-full z-10 min-w-44 rounded-lg border bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100">{item.children.map((child) => <a href={child.url} target={child.target} class="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100">{child.label}</a>)}</div>}</div> })}
+          {appearance.header.ctaLabel && <a href={appearance.header.ctaUrl} class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white">{appearance.header.ctaLabel}</a>}
+        </nav>
+      </div>
+    </header>
+    <main class:list={["flex-grow w-full", standalone ? '' : 'max-w-5xl mx-auto px-6 py-12']}><slot /></main>
+    <footer class:list={["border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm", { hidden: standalone }]}>
+      <div class:list={["max-w-5xl mx-auto px-6 py-8 grid gap-6", footerColumnsClass]}>
+        <div>{appearance.footer.showSiteName && <p class="font-semibold text-gray-700 dark:text-gray-200">{siteName}</p>}{appearance.footer.description && <p class="mt-2 max-w-md text-sm text-gray-500">{appearance.footer.description}</p>}<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{appearance.footer.copyright || `© ${new Date().getFullYear()} ${siteName}. All rights reserved.`}</p></div>
+        <nav class="flex flex-wrap gap-4">{footerMenu?.items.map((item) => <a href={item.url} target={item.target} class="text-sm text-gray-500 hover:text-primary">{item.label}</a>)}{appearance.footer.socialLinks.map((link) => <a href={link.url} target="_blank" rel="noopener" class="text-sm text-gray-500 hover:text-primary">{link.label}</a>)}</nav>
+      </div>
+    </footer>
+    {config.customJavaScript && <script is:inline set:html={config.customJavaScript}></script>}
+    {whatsapp?.enabled && <WhatsAppButton phone={whatsapp.phone} label={whatsapp.label} message={whatsapp.message} />}
+  </body>
+</html>

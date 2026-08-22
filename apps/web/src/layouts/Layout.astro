@@ -1,0 +1,93 @@
+---
+import '../styles/global.css';
+import type { ThemeSummary } from '@hiccms/theme-engine';
+import { DEFAULT_FOOTER_CONFIG, DEFAULT_HEADER_CONFIG, type PublicAppearance } from '@hiccms/appearance-manager';
+import { API_URL } from '../lib/api';
+import { getThemeManifest } from '../themes/registry';
+import ThemeRenderer from '../themes/ThemeRenderer.astro';
+import { organizationStructuredData, websiteStructuredData, type StructuredData } from '../lib/structured-data';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  metaKeywords?: string;
+  ogImage?: string;
+  standalone?: boolean;
+  preloadThemeFont?: boolean;
+  structuredData?: StructuredData | StructuredData[];
+}
+
+const { title, description, metaKeywords, ogImage, standalone = false, preloadThemeFont = true, structuredData } = Astro.props;
+let siteName = 'HICCMS';
+let siteDescription = 'A modern content management system';
+let activeTheme: ThemeSummary | null = null;
+let whatsapp = { enabled: false, phone: '', label: 'Hubungi via WhatsApp', message: '' };
+let appearance: PublicAppearance = {
+  menus: [
+    { id: 'fallback-primary', name: 'Primary Menu', slug: 'primary', location: 'primary', isEnabled: true, createdAt: '', updatedAt: '', items: [
+      { id: 'fallback-home', menuId: 'fallback-primary', parentId: null, label: 'Home', url: '/', target: '_self', sortOrder: 0, isEnabled: true, children: [] },
+      { id: 'fallback-about', menuId: 'fallback-primary', parentId: null, label: 'About', url: '/about', target: '_self', sortOrder: 1, isEnabled: true, children: [] },
+      { id: 'fallback-blog', menuId: 'fallback-primary', parentId: null, label: 'Blog', url: '/blog', target: '_self', sortOrder: 2, isEnabled: true, children: [] },
+    ] },
+    { id: 'fallback-footer', name: 'Footer Menu', slug: 'footer', location: 'footer', isEnabled: true, createdAt: '', updatedAt: '', items: [] },
+  ],
+  header: DEFAULT_HEADER_CONFIG,
+  footer: DEFAULT_FOOTER_CONFIG,
+};
+
+try {
+  const [settingsResponse, themeResponse, navigationResponse] = await Promise.all([
+    fetch(`${API_URL}/api/settings`),
+    fetch(`${API_URL}/api/themes/active`),
+    fetch(`${API_URL}/api/navigation/public`),
+  ]);
+  const settings = await settingsResponse.json() as { success: boolean; data?: Record<string, string> };
+  const theme = await themeResponse.json() as { success: boolean; data?: ThemeSummary };
+  const navigation = navigationResponse.ok
+    ? await navigationResponse.json() as { success: boolean; data?: PublicAppearance }
+    : { success: false };
+
+  if (settings.success && settings.data) {
+    siteName = settings.data.site_name || siteName;
+    siteDescription = settings.data.site_description || siteDescription;
+    whatsapp = {
+      enabled: settings.data.whatsapp_enabled === 'true',
+      phone: settings.data.whatsapp_number || '',
+      label: settings.data.whatsapp_label || 'Hubungi via WhatsApp',
+      message: settings.data.whatsapp_message || '',
+    };
+  }
+  if (theme.success && theme.data) activeTheme = theme.data;
+  if (navigation.success && navigation.data) appearance = navigation.data;
+} catch (error) {
+  console.error('Failed to fetch HICCMS site configuration', error);
+}
+
+const fallbackManifest = getThemeManifest(activeTheme?.id ?? 'trainer-pro');
+const config = activeTheme?.config ?? fallbackManifest.config;
+const finalTitle = title && title !== siteName ? `${title} | ${siteName}` : siteName;
+const finalDescription = description || siteDescription;
+
+const activeThemeId = activeTheme?.id ?? fallbackManifest.id;
+const pageStructuredData = structuredData ? (Array.isArray(structuredData) ? structuredData : [structuredData]) : [];
+const finalStructuredData = Astro.url.pathname === '/'
+  ? [organizationStructuredData(siteName, siteDescription), websiteStructuredData(siteName, siteDescription), ...pageStructuredData]
+  : pageStructuredData;
+---
+
+<ThemeRenderer
+  themeId={activeThemeId}
+  title={finalTitle}
+  description={finalDescription}
+  siteName={siteName}
+  metaKeywords={metaKeywords}
+  ogImage={ogImage}
+  config={config}
+  appearance={appearance}
+  standalone={standalone}
+  preloadThemeFont={preloadThemeFont}
+  structuredData={finalStructuredData}
+  whatsapp={whatsapp}
+>
+  <slot />
+</ThemeRenderer>

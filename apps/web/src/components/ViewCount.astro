@@ -1,0 +1,18 @@
+---
+interface Props {
+  count?: number | null;
+  class?: string;
+}
+
+const { count = 0, class: className = '' } = Astro.props;
+const normalizedCount = Number.isFinite(Number(count)) ? Math.max(0, Number(count)) : 0;
+const formattedCount = new Intl.NumberFormat('id-ID').format(normalizedCount);
+---
+
+<span class:list={['inline-flex items-center gap-1.5', className]} title={`${formattedCount} kali dibaca`} aria-label={`${formattedCount} kali dibaca`}>
+  <svg viewBox="0 0 24 24" class="h-4 w-4 fill-none stroke-current" aria-hidden="true">
+    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="12" cy="12" r="2.5" stroke-width="1.8" />
+  </svg>
+  <span>{formattedCount} kali dibaca</span>
+</span>

@@ -1,0 +1,242 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { resolveMediaUrl } from '../../lib/media';
+import { API_URL } from '../../lib/api';
+import { articleStructuredData, breadcrumbStructuredData } from '../../lib/structured-data';
+import RelatedPostCard from '../../components/RelatedPostCard.astro';
+import ViewCount from '../../components/ViewCount.astro';
+import { resolveArticleSeo } from '../../lib/article-seo';
+
+export async function getStaticPaths() {
+  try {
+    const res = await fetch(`${import.meta.env.PUBLIC_API_URL || 'http://localhost:8787'}/api/posts`);
+    const data = await res.json();
+    if (data.success) {
+      return data.data.map((post: any) => ({ params: { slug: post.slug } }));
+    }
+  } catch (e) {
+    console.error("Failed to fetch posts for getStaticPaths", e);
+  }
+  return [];
+}
+
+const { slug } = Astro.params;
+
+// Fetch full post details
+let post: any = null;
+try {
+  const res = await fetch(`${API_URL}/api/posts/${slug}`);
+  const data = await res.json();
+  if (data.success) {
+    post = data.data;
+  }
+} catch (e) {
+  console.error("Failed to fetch full post", e);
+}
+
+if (!post) return Astro.redirect('/404');
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+};
+const imageUrl = resolveMediaUrl(post.og_image);
+const { title: effectiveSeoTitle, description: effectiveSeoDescription } = resolveArticleSeo(post);
+const articleSchemas = [
+  breadcrumbStructuredData([
+    { name: 'Beranda', path: '/' },
+    { name: 'Blog', path: '/blog' },
+    { name: post.title, path: `/blog/${post.slug}` },
+  ]),
+  ...(!post.is_locked ? [articleStructuredData({
+    title: post.title,
+    description: effectiveSeoDescription,
+    slug: post.slug,
+    author: post.author,
+    publishedAt: post.published_at || post.created_at,
+    updatedAt: post.updated_at,
+    image: imageUrl,
+    category: post.category,
+    keywords: post.meta_keywords,
+  })] : []),
+];
+const hasContent = typeof post.content === 'string'
+  && post.content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length > 0;
+const relatedPosts: Array<Record<string, any>> = Array.isArray(post.related_posts) ? post.related_posts : [];
+const middleRelatedPost = relatedPosts[0];
+const bottomRelatedPosts = relatedPosts.slice(1, 4).length > 0 ? relatedPosts.slice(1, 4) : relatedPosts.slice(0, 3);
+const splitContentAfterParagraph = (html: string, paragraphNumber: number) => {
+  const closingParagraph = /<\/p\s*>/gi;
+  let match: RegExpExecArray | null = null;
+  for (let index = 0; index < paragraphNumber; index += 1) {
+    match = closingParagraph.exec(html);
+    if (!match) return { before: html, after: '' };
+  }
+  if (!match) return { before: html, after: '' };
+  const splitAt = match.index + match[0].length;
+  return { before: html.slice(0, splitAt), after: html.slice(splitAt) };
+};
+const articleContent = hasContent ? splitContentAfterParagraph(post.content, 3) : { before: '', after: '' };
+---
+
+<Layout 
+  title={effectiveSeoTitle}
+  description={effectiveSeoDescription}
+  metaKeywords={post.meta_keywords} 
+  ogImage={imageUrl}
+  structuredData={articleSchemas}
+>
+  <article class="bg-white dark:bg-gray-900 rounded-3xl shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-gray-800 overflow-hidden">
+    
+    <!-- Header/Hero for Article -->
+    <header class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-8 py-16 text-center border-b border-gray-200 dark:border-gray-800">
+      <div class="mb-4 text-sm font-medium text-primary tracking-widest uppercase">
+        {formatDate(post.published_at || post.created_at)}
+      </div>
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6 max-w-4xl mx-auto">
+        {post.title}
+      </h1>
+      <ViewCount count={post.view_count} class="mb-6 justify-center text-sm text-gray-500 dark:text-gray-400" />
+      {post.excerpt && (
+        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          {post.excerpt}
+        </p>
+      )}
+    </header>
+
+    {imageUrl && <figure class="max-h-[36rem] overflow-hidden border-b border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-800"><img src={imageUrl} alt={`Gambar utama ${post.title}`} class="h-full max-h-[36rem] w-full object-cover" /></figure>}
+
+    <!-- Main Content -->
+    <div class="px-8 py-12 md:py-16 max-w-3xl mx-auto prose prose-lg dark:prose-invert prose-primary font-serif leading-loose relative">
+      {post.is_locked ? (
+        <div id="unlock-container" class="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl border border-gray-200 dark:border-gray-700 text-center max-w-md mx-auto my-12">
+          <svg class="w-12 h-12 mx-auto text-primary mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2 !mt-0">Artikel Terkunci</h2>
+          <p class="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-6">Artikel ini dilindungi dengan sandi. Masukkan sandi untuk membaca isi lengkap artikel ini.</p>
+          <form id="unlock-form" data-slug={slug} data-api-url={API_URL} class="flex flex-col gap-3">
+            <input type="password" id="password-input" placeholder="Masukkan Sandi Rahasia..." required class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-white" />
+            <button type="submit" id="unlock-btn" class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-4 rounded-xl transition-colors flex items-center justify-center">
+              <span>Buka Kunci</span>
+              <div id="unlock-spinner" class="hidden ml-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </button>
+            <p id="unlock-error" class="text-red-500 text-sm hidden mt-2"></p>
+          </form>
+        </div>
+        <div id="unlocked-content" class="hidden"></div>
+      ) : (
+        hasContent ? (
+          <>
+            <div set:html={articleContent.before} />
+            {middleRelatedPost && articleContent.after && <RelatedPostCard post={middleRelatedPost} compact />}
+            {articleContent.after && <div set:html={articleContent.after} />}
+          </>
+        ) : <p>{post.excerpt || 'Konten artikel belum tersedia.'}</p>
+      )}
+    </div>
+
+  </article>
+
+  {!post.is_locked && bottomRelatedPosts.length > 0 && (
+    <section class="mt-12" aria-labelledby="related-articles-title">
+      <div class="mb-6 flex items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-widest text-primary">Baca berikutnya</p>
+          <h2 id="related-articles-title" class="mt-2 text-3xl font-extrabold text-gray-900 dark:text-white">Artikel Terkait</h2>
+        </div>
+        <a href="/blog" class="text-sm font-semibold text-primary hover:opacity-80">Semua artikel</a>
+      </div>
+      <div class="grid gap-6 md:grid-cols-3">
+        {bottomRelatedPosts.map((relatedPost) => <RelatedPostCard post={relatedPost} />)}
+      </div>
+    </section>
+  )}
+
+  <div class="mt-12 text-center">
+    <a href="/" class="inline-flex items-center text-primary font-semibold hover:opacity-80 transition-opacity">
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      Kembali ke Beranda
+    </a>
+  </div>
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('unlock-form');
+    if (!form) return;
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const slug = form.dataset.slug;
+      const passwordInput = document.getElementById('password-input') as HTMLInputElement;
+      const errorMsg = document.getElementById('unlock-error');
+      const spinner = document.getElementById('unlock-spinner');
+      const btn = document.getElementById('unlock-btn');
+      
+      const password = passwordInput.value;
+      if (!password) return;
+      
+      // Reset state
+      if(errorMsg) errorMsg.classList.add('hidden');
+      if(spinner) spinner.classList.remove('hidden');
+      if(btn) btn.setAttribute('disabled', 'true');
+      
+      try {
+        const apiUrl = form.dataset.apiUrl;
+        const res = await fetch(`${apiUrl}/api/posts/${slug}/unlock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          const container = document.getElementById('unlock-container');
+          const contentDiv = document.getElementById('unlocked-content');
+          if(container) container.classList.add('hidden');
+          if(contentDiv) {
+            contentDiv.innerHTML = data.content;
+            contentDiv.classList.remove('hidden');
+          }
+        } else {
+          if(errorMsg) {
+            errorMsg.textContent = 'Sandi salah. Coba lagi.';
+            errorMsg.classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        if(errorMsg) {
+          errorMsg.textContent = 'Terjadi kesalahan jaringan.';
+          errorMsg.classList.remove('hidden');
+        }
+      } finally {
+        if(spinner) spinner.classList.add('hidden');
+        if(btn) btn.removeAttribute('disabled');
+      }
+    });
+  });
+</script>
+
+<style is:global>
+  /* Custom styling for the Markdown content injected via set:html */
+  .prose h2, .prose h3 {
+    color: var(--color-primary);
+    font-family: 'Outfit', sans-serif;
+  }
+  .prose p {
+    color: #4b5563;
+  }
+  html.dark .prose p {
+    color: #d1d5db;
+  }
+  .prose a {
+    color: var(--color-primary);
+    text-decoration-color: var(--color-primary);
+    transition: opacity 0.2s;
+  }
+  .prose a:hover {
+    opacity: 0.8;
+  }
+</style>
