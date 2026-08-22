@@ -58,4 +58,8 @@ Laporkan kerentanan mengikuti petunjuk pada [SECURITY.md](SECURITY.md). Jangan m
 
 ## Lisensi
 
-Hak cipta HIC-CMS tetap dilindungi. Ketentuan lisensi Community Core dan lisensi komersial add-on akan dipublikasikan secara terpisah. Sampai lisensi eksplisit tersedia, jangan menganggap kode ini memberi izin untuk menjual ulang add-on komersial.
+Copyright 2026 Henri Ilham Caniago.
+
+HIC-CMS Community Core tersedia berdasarkan [Apache License 2.0](LICENSE). Nama, logo, dan identitas merek HIC-CMS mengikuti [HIC-CMS Trademark Policy](TRADEMARKS.md).
+
+Automation Hub AI, Content Builder Pro, dan Page Builder Pro adalah produk komersial terpisah. Source dan hak penggunaan produk tersebut tidak diberikan oleh lisensi Community Core.
